@@ -1,0 +1,33 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'app.devicesorter'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId 'app.devicesorter'
+        minSdk 28
+        targetSdk 34
+        versionCode 1
+        versionName '0.1.0'
+        testInstrumentationRunner 'android.test.InstrumentationTestRunner'
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    lint {
+        abortOnError true
+    }
+}
+
+dependencies {
+    implementation 'com.drewnoakes:metadata-extractor:2.22.0'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestCompileOnly files(
+            "${android.sdkDirectory}/platforms/android-34/optional/android.test.runner.jar",
+            "${android.sdkDirectory}/platforms/android-34/optional/android.test.base.jar")
+    androidTestCompileOnly 'junit:junit:4.13.2'
+}

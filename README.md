@@ -264,3 +264,9 @@ APK 默认位于 `app/build/outputs/apk/debug/app-debug.apk`。Gradle 包装器�
 - [Android MediaStore](https://developer.android.com/reference/android/provider/MediaStore)（`createTrashRequest` 系统回收站接口）。
 
 APK 内附第三方许可证。请保留这些声明。
+
+## 许可证
+
+本项目以 [MIT 许可证](LICENSE) 发布，© 2026 sAchNMN。可以自由使用、修改、分发和商用，保留版权声明即可；软件按「原样」提供，不含任何担保。
+
+MIT 只覆盖本仓库的代码与文档。通过 `metadata-extractor` 等依赖引入的部分遵循其各自的许可证（Apache-2.0 等），见上一节与本仓库 `app/src/main/assets/THIRD_PARTY_NOTICES.txt`。

@@ -36,7 +36,12 @@ final class Naming {
     }
 
     static boolean overlaps(String a, String b) {
-        return a.equals(b) || a.startsWith(b + "/") || b.startsWith(a + "/");
+        String[] first = a.split(":", 2);
+        String[] second = b.split(":", 2);
+        if (!first[0].equals(second[0])) return false;
+        String firstPath = first[1], secondPath = second[1];
+        return firstPath.isEmpty() || secondPath.isEmpty() || firstPath.equals(secondPath)
+                || firstPath.startsWith(secondPath + "/") || secondPath.startsWith(firstPath + "/");
     }
 
     private static String shortHash(String value) {

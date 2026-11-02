@@ -12,6 +12,7 @@ final class Transfer {
         InputStream readSource() throws IOException;
         InputStream readTarget() throws IOException;
         OutputStream createTarget() throws IOException;
+        void syncTarget() throws IOException;
         long sourceSize() throws IOException;
         long sourceModified() throws IOException;
         void deleteSource() throws IOException;
@@ -46,6 +47,7 @@ final class Transfer {
                 }
                 out.flush();
             }
+            files.syncTarget();
             copiedHash = digest.digest();
             if (initialSize >= 0 && count != initialSize) throw new IOException("复制字节数不一致");
             byte[] targetHash;
@@ -71,18 +73,27 @@ final class Transfer {
         String hash = hex(copiedHash);
         // Flush the verified destination to the journal before any destructive operation.
         files.record("VERIFIED_COPY", hash);
-        if (!move) return new Outcome("COPIED", hash);
+        checkCancelled(files);
+        if (move) files.record("DELETE_PENDING", hash);
+        // Finalization may rename the target; verify the final URI after journal writes.
+        files.syncTarget();
+        try (InputStream target = files.readTarget()) {
+            if (!Arrays.equals(copiedHash, hash(target, files))) {
+                throw new IOException("最终目标 SHA-256 校验失败，保留原文件");
+            }
+        }
         checkCancelled(files);
         try (InputStream source = files.readSource()) {
             if (!Arrays.equals(copiedHash, hash(source, files))) {
-                throw new IOException("删除前源文件校验不一致，保留两份文件");
+                throw new IOException("最终源文件校验不一致，保留两份文件");
             }
         }
         checkCancelled(files);
         if (files.sourceSize() != initialSize || files.sourceModified() != initialModified) {
-            throw new IOException("删除前源文件已变化，保留两份文件");
+            throw new IOException("最终源文件已变化，保留两份文件");
         }
-        files.record("DELETE_PENDING", hash);
+        checkCancelled(files);
+        if (!move) return new Outcome("COPIED", hash);
         files.deleteSource();
         return new Outcome("MOVED", hash);
     }

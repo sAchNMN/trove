@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Neutral surfaces: warm grey page, white card, one hairline. -->
+    <color name="surface">#F7F7F5</color>
+    <color name="surface_container">#FFFFFF</color>
+    <color name="surface_container_low">#F0F0ED</color>
+    <color name="surface_container_high">#E9E9E5</color>
+
+    <!-- Text on surface: on_surface 16.9:1 and on_surface_variant 6.0:1 pass AA at any size.
+         on_surface_faint is 3.15:1: decoration, disabled labels, or text at 18.66sp+ bold
+         only - never body copy. -->
+    <color name="on_surface">#161615</color>
+    <color name="on_surface_variant">#5F5F5A</color>
+    <color name="on_surface_faint">#8C8C86</color>
+
+    <color name="outline">#E6E6E1</color>
+    <color name="outline_strong">#D4D4CE</color>
+
+    <!-- Ink is the structural emphasis; the teal accent is the only chroma. -->
+    <color name="primary">#161615</color>
+    <color name="on_primary">#FFFFFF</color>
+    <color name="accent">#0F766E</color>
+    <color name="on_accent">#FFFFFF</color>
+    <color name="accent_container">#E3F1EE</color>
+    <color name="on_accent_container">#0B3B36</color>
+
+    <color name="error">#B3261E</color>
+    <color name="scrim">#1C1C1B</color>
+    <color name="on_scrim">#FFFFFF</color>
+</resources>

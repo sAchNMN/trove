@@ -17,6 +17,7 @@ public class TransferTest {
         ByteArrayOutputStream target;
         boolean deleted, cleaned, corruptTarget, failWrite, failJournal, failDelete, cancel;
         boolean mutateBeforeDelete, mutateDuringCopy;
+        boolean synced, failSync;
         int sourceReads;
         long modified = 123;
         List<String> journal = new ArrayList<>();
@@ -41,6 +42,10 @@ public class TransferTest {
                     target.write(b);
                 }
             };
+        }
+        @Override public void syncTarget() throws IOException {
+            if (failSync) throw new IOException("target sync failed");
+            synced = true;
         }
         @Override public long sourceSize() { return source.length; }
         @Override public long sourceModified() { return modified; }
@@ -130,11 +135,104 @@ public class TransferTest {
         assertFalse(files.deleted);
     }
 
+    @Test public void targetIsSyncedBeforeVerification() throws Exception {
+        FakeFiles files = new FakeFiles() {
+            @Override public InputStream readTarget() {
+                assertTrue("Target must be synced before verification", synced);
+                return super.readTarget();
+            }
+        };
+        assertEquals("MOVED", Transfer.run(files, true, files.source.length, 123).status());
+        assertTrue(files.deleted);
+    }
+
+    @Test public void syncFailureNeverDeletesOriginal() {
+        FakeFiles files = new FakeFiles(); files.failSync = true;
+        assertThrows(IOException.class, () -> Transfer.run(files, true, files.source.length, 123));
+        assertFalse(files.deleted);
+        assertTrue(files.cleaned);
+        assertTrue(files.journal.isEmpty());
+    }
+
+    @Test public void syncFailureCannotReportSuccessfulCopy() {
+        FakeFiles files = new FakeFiles(); files.failSync = true;
+        assertThrows(IOException.class, () -> Transfer.run(files, false, files.source.length, 123));
+        assertFalse(files.deleted);
+        assertTrue(files.cleaned);
+    }
+
+    @Test public void cancellationDuringDeleteJournalKeepsBothFiles() {
+        FakeFiles files = new FakeFiles() {
+            @Override public void record(String status, String hash) throws IOException {
+                super.record(status, hash);
+                if ("DELETE_PENDING".equals(status)) cancel = true;
+            }
+        };
+        assertThrows(IOException.class, () -> Transfer.run(files, true, files.source.length, 123));
+        assertFalse(files.deleted);
+        assertFalse(files.cleaned);
+        assertArrayEquals(files.source, files.target.toByteArray());
+    }
+
     @Test public void unknownLengthStillRequiresMatchingHashes() throws Exception {
         FakeFiles files = new FakeFiles() {
             @Override public long sourceSize() { return -1; }
         };
         assertEquals("MOVED", Transfer.run(files, true, -1, 123).status());
         assertTrue(files.deleted);
+    }
+
+    @Test public void targetChangedDuringRenameCannotDeleteSource() {
+        FakeFiles files = new FakeFiles() {
+            @Override public void record(String status, String hash) throws IOException {
+                super.record(status, hash);
+                if ("VERIFIED_COPY".equals(status)) corruptTarget = true;
+            }
+        };
+        assertThrows(IOException.class, () -> Transfer.run(files, true, files.source.length, 123));
+        assertFalse(files.deleted);
+        assertFalse(files.cleaned);
+    }
+
+    @Test public void targetChangedDuringDeleteJournalCannotDeleteSource() {
+        FakeFiles files = new FakeFiles() {
+            @Override public void record(String status, String hash) throws IOException {
+                super.record(status, hash);
+                if ("DELETE_PENDING".equals(status)) corruptTarget = true;
+            }
+        };
+        assertThrows(IOException.class, () -> Transfer.run(files, true, files.source.length, 123));
+        assertFalse(files.deleted);
+    }
+
+    @Test public void sourceChangedDuringDeleteJournalCannotBeDeleted() {
+        FakeFiles files = new FakeFiles() {
+            @Override public void record(String status, String hash) throws IOException {
+                super.record(status, hash);
+                if ("DELETE_PENDING".equals(status)) source[0] ^= 1;
+            }
+        };
+        assertThrows(IOException.class, () -> Transfer.run(files, true, files.source.length, 123));
+        assertFalse(files.deleted);
+    }
+
+    @Test public void copyCannotReportSuccessAfterRenameCorruptsTarget() {
+        FakeFiles files = new FakeFiles() {
+            @Override public void record(String status, String hash) throws IOException {
+                super.record(status, hash);
+                if ("VERIFIED_COPY".equals(status)) corruptTarget = true;
+            }
+        };
+        assertThrows(IOException.class, () -> Transfer.run(files, false, files.source.length, 123));
+        assertFalse(files.deleted);
+    }
+
+    @Test public void copyCannotReportSuccessWhenSourceChangesWithoutSizeOrTimestampChange() {
+        FakeFiles files = new FakeFiles();
+        files.mutateBeforeDelete = true;
+        assertThrows(IOException.class, () -> Transfer.run(files, false, files.source.length, 123));
+        assertFalse(files.deleted);
+        assertNotNull(files.target);
+        assertFalse(files.cleaned);
     }
 }

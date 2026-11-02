@@ -10,8 +10,8 @@ android {
         applicationId 'app.devicesorter'
         minSdk 28
         targetSdk 34
-        versionCode 1
-        versionName '0.1.0'
+        versionCode 9
+        versionName '0.7.0'
         testInstrumentationRunner 'android.test.InstrumentationTestRunner'
     }
     compileOptions {

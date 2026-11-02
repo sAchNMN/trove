@@ -35,4 +35,14 @@ public class NamingTest {
         assertFalse(Naming.overlaps("primary:DCIM", "primary:DCIM-old"));
         assertFalse(Naming.overlaps("primary:A", "1234:A"));
     }
+
+    @Test public void volumeRootsOverlapAllDirectoriesOnTheSameVolume() {
+        assertTrue(Naming.overlaps("primary:", "primary:DCIM"));
+        assertTrue(Naming.overlaps("primary:DCIM/Camera", "primary:"));
+        assertTrue(Naming.overlaps("1234-ABCD:", "1234-ABCD:Pictures"));
+        assertTrue(Naming.overlaps("1234-ABCD:Pictures", "1234-ABCD:"));
+        assertTrue(Naming.overlaps("primary:", "primary:"));
+        assertFalse(Naming.overlaps("primary:", "1234-ABCD:DCIM"));
+        assertFalse(Naming.overlaps("primary:", "1234-ABCD:"));
+    }
 }

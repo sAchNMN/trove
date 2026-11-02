@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="surface">#0E0E0D</color>
+    <color name="surface_container">#191918</color>
+    <color name="surface_container_low">#141413</color>
+    <color name="surface_container_high">#242422</color>
+
+    <!-- Text on surface: 17.2:1 / 8.2:1 / 4.6:1 - all three pass AA at 12sp or larger. -->
+    <color name="on_surface">#F2F2ED</color>
+    <color name="on_surface_variant">#A9A9A2</color>
+    <color name="on_surface_faint">#7C7C76</color>
+
+    <color name="outline">#2C2C2A</color>
+    <color name="outline_strong">#3C3C39</color>
+
+    <color name="primary">#F2F2ED</color>
+    <color name="on_primary">#111110</color>
+    <color name="accent">#6FD3BA</color>
+    <color name="on_accent">#062018</color>
+    <color name="accent_container">#14352D</color>
+    <color name="on_accent_container">#B9EAD9</color>
+
+    <color name="error">#F2B8B5</color>
+    <color name="scrim">#2A2A28</color>
+    <color name="on_scrim">#F2F2ED</color>
+</resources>

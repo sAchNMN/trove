@@ -8,3 +8,12 @@ emulator-*.log
 .test-tools/
 *.apk
 *.aab
+
+# 本机工具目录与沙箱诊断记录，不随仓库发布
+.acl-reports/
+.agents/
+.claude/
+
+# 只发布源码与文档：构建产物与测试报告留在本机
+dist/
+*-TEST-REPORT.md
